@@ -7,6 +7,7 @@ public class ScrollingScanlines : MonoBehaviour
 {
     public float scrollSpeed = 0.05f; 
     private RawImage rawImage;
+    public bool mainMenu;
 
     void Start()
     {
@@ -17,7 +18,7 @@ public class ScrollingScanlines : MonoBehaviour
     {
         Rect currentUV = rawImage.uvRect;
 
-        if (Time.timeScale == 0 && TimeForward.instance.choosing != 0)
+        if (!mainMenu && Time.timeScale == 0 && TimeForward.instance.choosing != 0)
         {
             currentUV.y += scrollSpeed * Time.unscaledDeltaTime;
         }

@@ -593,6 +593,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VillagerPathFind
   moveSpeed: 3
+  villager: {fileID: 608116680714210915}
   isMoving: 0
   currentGridPosition: {x: 0, y: 0}
 --- !u!114 &3645880358106294929

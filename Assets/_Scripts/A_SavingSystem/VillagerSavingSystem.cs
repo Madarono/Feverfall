@@ -120,9 +120,19 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
     [Header("Game Mode")]
     public Mode mode;
     public Difficulty difficulty;
+    
+    public float o_VirusPower;
+    public float o_ShopMultiplier;
+    public float o_PenaltyMultiplier;
+    public int o_StartingCash;
+    public float o_ScaleRate;
 
     [Header("Win Con")]
     public bool hasWon;
+    public bool fromEnvelope;
+    
+    [Header("Lost Con")]
+    public bool hasLost;
 
     //Temporary then delete immediately
     private List<Building> lateStateBuildings = new List<Building>();
@@ -135,9 +145,9 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
     public void SaveData(GameData data)
     {
         SaveInfo(); 
-        data.villagerId = this.villagerId;
-        data.houseId = this.houseId;
-        data.jobId = this.jobId;
+        data.jobId = new List<int>(this.jobId);
+        data.houseId = new List<int>(this.houseId);
+        data.villagerId = new List<int>(this.villagerId);
         data.quarantineId = this.quarantineId;
         data.villagerPos = this.villagerPos;
         data.villagerHunger = this.villagerHunger;
@@ -221,40 +231,43 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
         data.mode = this.mode;
         data.difficulty = this.difficulty;
         data.hasWon = this.hasWon;
+
+        data.fromEnvelope = this.fromEnvelope;
+        data.hasLost = this.hasLost;
     }
 
     public void LoadData(GameData data)
     {
-        this.villagerId = data.villagerId;
-        this.houseId = data.houseId;
-        this.jobId = data.jobId;
-        this.quarantineId = data.quarantineId;
-        this.villagerPos = data.villagerPos;
-        this.villagerHunger = data.villagerHunger;
-        this.daysLeft = data.daysLeft;
+        this.villagerId = new List<int>(data.villagerId);
+        this.houseId = new List<int>(data.houseId);
+        this.jobId = new List<int>(data.jobId);
+        this.quarantineId = new List<int>(data.quarantineId);
+        this.villagerPos = new List<Vector3>(data.villagerPos);
+        this.villagerHunger = new List<float>(data.villagerHunger);
+        this.daysLeft = new List<int>(data.daysLeft);
 
-        this.deadVillagerPos = data.deadVillagerPos;
-        this.deadVillagerVirus = data.deadVillagerVirus;
+        this.deadVillagerPos = new List<Vector3>(data.deadVillagerPos);
+        this.deadVillagerVirus = new List<Virus>(data.deadVillagerVirus);
         this.totalDead = data.totalDead;
 
-        this.villagerHealth = data.villagerHealth;
-        this.villagerVirus = data.villagerVirus;
+        this.villagerHealth = new List<Health>(data.villagerHealth);
+        this.villagerVirus = new List<Virus>(data.villagerVirus);
 
-        this.motelId = data.motelId;
-        this.motelTypeId = data.motelTypeId;
-        this.motelSellValue = data.motelSellValue;
-        this.motelPos = data.motelPos;
+        this.motelId = new List<int>(data.motelId);
+        this.motelTypeId = new List<int>(data.motelTypeId);
+        this.motelSellValue = new List<int>(data.motelSellValue);
+        this.motelPos = new List<Vector3>(data.motelPos);
 
-        this.workplaceId = data.workplaceId;
-        this.workplaceTypeId = data.workplaceTypeId;
-        this.workplaceSellValue = data.workplaceSellValue;
-        this.workplacePos = data.workplacePos;
-        this.matSelectionId = data.matSelectionId;
+        this.workplaceId = new List<int>(data.workplaceId);
+        this.workplaceTypeId = new List<int>(data.workplaceTypeId);
+        this.workplaceSellValue = new List<int>(data.workplaceSellValue);
+        this.workplacePos = new List<Vector3>(data.workplacePos);
+        this.matSelectionId = new List<int>(data.matSelectionId);
 
-        this.dailyDemand = data.dailyDemand;
+        this.dailyDemand = (float[])data.dailyDemand.Clone();
         this.demandPower = data.demandPower;
 
-        this.roadPos = data.roadPos;
+        this.roadPos = new List<Vector2>(data.roadPos);
 
         this.moneySave = data.moneySave;
         this.wheatSave = data.wheatSave;
@@ -277,7 +290,7 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
         this.canScreenShake = data.canScreenShake;
         this.fpsIndex = data.fpsIndex;
 
-        this.viruses = data.viruses;
+        this.viruses = new List<Virus>(data.viruses);
 
         this.timeInsideCurrent = data.timeInsideCurrent;
         this.timeoutCurrent = data.timeoutCurrent;
@@ -295,24 +308,33 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
         this.totalSick = data.totalSick;
         this.totalMoneyGained = data.totalMoneyGained;
 
-        this.pageInfo = data.pageInfo;
-        this.headerInfo = data.headerInfo;
+        this.pageInfo = new List<string>(data.pageInfo);
+        this.headerInfo = new List<string>(data.headerInfo);
 
-        this.virusNames = data.virusNames;
-        this.manualPage = data.manualPage;
+        this.virusNames = new List<string>(data.virusNames);
+        this.manualPage = new List<int>(data.manualPage);
 
-        this.curedVirusId = data.curedVirusId;
-        this.vaccinatedVirusId = data.vaccinatedVirusId;
+        this.curedVirusId = new List<int>(data.curedVirusId);
+        this.vaccinatedVirusId = new List<int>(data.vaccinatedVirusId);
 
-        this.doneTutorials = data.doneTutorials;
+        this.doneTutorials = new List<bool>(data.doneTutorials);
+
         this.newGame = data.newGame;
 
-        this.mode = data.mode;
-        this.difficulty = data.difficulty;
+        this.mode = newGame ? data.mainMenuMode : data.mode;
+        this.difficulty = newGame ? data.mainMenuDifficulty : data.difficulty;
         this.hasWon = data.hasWon;
+        this.fromEnvelope = data.fromEnvelope;
+
+        this.o_VirusPower = data.o_VirusPower;
+        this.o_ShopMultiplier = data.o_ShopMultiplier;
+        this.o_PenaltyMultiplier = data.o_PenaltyMultiplier;
+        this.o_StartingCash = data.o_StartingCash;
+        this.o_ScaleRate = data.o_ScaleRate;
 
         LoadInfo();
     }
+
 
     [ContextMenu("SaveInfo")]
     public void SaveInfo()
@@ -474,7 +496,6 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
 
         //Gathering the WinCon's info
         hasWon = WinCon.instance.hasWon;
-
     }
 
     public void LoadInfo()
@@ -482,12 +503,33 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
         motelTransform.Clear();
         workplaceTransform.Clear();
 
+        //DifficultScaling.cs
+        GameMode.instance.o_VirusPower = o_VirusPower;
+        GameMode.instance.o_ShopMultiplier = o_ShopMultiplier;
+        GameMode.instance.o_PenaltyMultiplier = o_PenaltyMultiplier;
+        GameMode.instance.o_StartingCash = o_StartingCash;
+        GameMode.instance.o_ScaleRate = o_ScaleRate;
+
         //GameMode.cs
         Stats.instance.totalDays = totalDays;
         GameMode.instance.mode = mode;
         GameMode.instance.difficulty = difficulty;
         GameMode.instance.ApplyMode(newGame);
 
+        //Settings
+        Settings.instance.sfxValue = sfxValue;
+        Settings.instance.musicValue = musicValue;
+        Settings.instance.muteSfx = muteSfx;
+        Settings.instance.muteMusic = muteMusic;
+        Settings.instance.graphicsIndex = graphicsIndex;
+        Settings.instance.canScreenShake = canScreenShake;
+        Settings.instance.fpsIndex = fpsIndex;
+        Settings.instance.musicSlider.value = musicValue * Settings.instance.audioDivider;
+        Settings.instance.sfxSlider.value = sfxValue * Settings.instance.audioDivider;
+        Settings.instance.UpdateValues();
+        Settings.instance.SetFPS();
+        Settings.instance.ApplyChanges();
+        AudioManager.instance.UpdateVolume();
         //Roads
         for(int i = 0; i < roadPos.Count; i++)
         {
@@ -531,7 +573,6 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
         {
             Vector3 villagerIntPos = new Vector3(Mathf.FloorToInt(villagerPos[i].x), Mathf.FloorToInt(villagerPos[i].y), Mathf.FloorToInt(villagerPos[i].z));
             GameObject go = Instantiate(villagerPrefab, villagerIntPos, Quaternion.identity);
-            Debug.Log(go.transform.position);
             if(go.TryGetComponent(out VillagerAI goScript))
             {
                 goScript.villagerHealth.health = villagerHealth[i];
@@ -585,6 +626,9 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
             }
         }
 
+        //GridManager
+        GridManager.instance.StartManager();
+
         TownManager.instance.totalDead = totalDead;
 
         if(!newGame) MoneyCounter.instance.deltaPrice = moneySave;
@@ -604,21 +648,6 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
         DayCycle.instance.minutes = minuteSave;
         DayCycle.instance.seconds = secondSave;
         DayCycle.instance.UpdateClock(true); //To force update on the time
-
-        //Settings
-        Settings.instance.sfxValue = sfxValue;
-        Settings.instance.musicValue = musicValue;
-        Settings.instance.muteSfx = muteSfx;
-        Settings.instance.muteMusic = muteMusic;
-        Settings.instance.graphicsIndex = graphicsIndex;
-        Settings.instance.canScreenShake = canScreenShake;
-        Settings.instance.fpsIndex = fpsIndex;
-        Settings.instance.musicSlider.value = musicValue * Settings.instance.audioDivider;
-        Settings.instance.sfxSlider.value = sfxValue * Settings.instance.audioDivider;
-        Settings.instance.UpdateValues();
-        Settings.instance.SetFPS();
-        Settings.instance.ApplyChanges();
-        AudioManager.instance.UpdateVolume();
 
         //VirusManager
         VirusManager.instance.viruses = new List<Virus>();
@@ -686,15 +715,20 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
         VaccineSystem.instance.curedVirusId = new HashSet<int>(this.curedVirusId);
         VaccineSystem.instance.vaccinatedVirusId = new HashSet<int>(this.vaccinatedVirusId);
 
-        //TutorialSystem.cs
-        for(int i = 0; i < doneTutorials.Count; i++)
-        {
-            TutorialSystem.instance.objectives[i].done = doneTutorials[i];
-        }
-
         //WinCon.cs
         WinCon.instance.hasWon = hasWon;
         WinCon.instance.UpdateVisual();
+
+        if(hasWon)
+        {
+            WinCon.instance.TriggerWin(false, false);
+        }
+
+        if(newGame)
+        {
+            VillageNewGame.instance.DeletePrevious();
+            VillageNewGame.instance.InitializeNewGame();
+        }
 
         newGame = false;
         StartCoroutine(WaitForStart());
@@ -717,9 +751,15 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
 
     Transform GetTransformFromId(int id, List<Transform> resultTransform, List<int> resultId)
     {
-        for(int i = 0; i < resultId.Count; i++)
+        if (resultTransform.Count != resultId.Count)
         {
-            if(id == resultId[i])
+            Debug.LogError($"ID/Transform mismatch! IDs: {resultId.Count}, Transforms: {resultTransform.Count}, Requested ID: {id}");
+            return null;
+        }
+
+        for (int i = 0; i < resultId.Count; i++)
+        {
+            if (id == resultId[i])
             {
                 return resultTransform[i];
             }
@@ -727,7 +767,7 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
 
         return null;
     }
-
+    
     IEnumerator WaitForStart()
     {
         yield return new WaitForEndOfFrame();
@@ -781,6 +821,13 @@ public class VillagerSavingSystem : MonoBehaviour, IDataPersistence
         foreach(var villager in TownManager.instance.villagers)
         {
             villager.villagerHealth.CheckVirus();
+        }
+
+        // TutorialSystem.cs
+        int tutorialCount = Mathf.Min(doneTutorials.Count, TutorialSystem.instance.objectives.Length);
+        for(int i = 0; i < tutorialCount; i++)
+        {
+            TutorialSystem.instance.objectives[i].done = doneTutorials[i];
         }
     }
 }

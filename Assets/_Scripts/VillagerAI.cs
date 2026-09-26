@@ -86,6 +86,8 @@ public class VillagerAI : MonoBehaviour
     private List<Vector2Int> allPos = new List<Vector2Int>();
 
     public bool hasWarnedInsomnia = false;
+
+    bool firstTime = true;
     
 
     public void Start()
@@ -327,6 +329,11 @@ public class VillagerAI : MonoBehaviour
 
     public void FailedPathfinding()
     {
+        if(firstTime)
+        {
+            StartCoroutine(TryAgainFirstTime());
+        }
+
         Debug.Log("Failed Pathfinding..");
 
         if (state == VillagerState.Moving && cacheTarget == null)
@@ -549,5 +556,13 @@ public class VillagerAI : MonoBehaviour
         isCoughing = false;
 
         wanderTimer = 0.5f;
+    }
+
+    IEnumerator TryAgainFirstTime()
+    {
+        yield return null;
+        yield return new WaitForSecondsRealtime(0.1f);
+        MoveVillager(cacheTarget, cacheOffsetX, cacheOffsetY);
+        firstTime = false;
     }
 }

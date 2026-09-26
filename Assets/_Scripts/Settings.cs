@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -78,8 +79,8 @@ public class Settings : MonoBehaviour
     {
         isOpen = false;
         window.SetActive(false);
-        timeForward = TimeForward.instance;
-        camera = CameraPinch.Instance;
+        if(TimeForward.instance != null) timeForward = TimeForward.instance;
+        if(CameraPinch.Instance != null) camera = CameraPinch.Instance;
 
         if (ppVolume != null && ppVolume.profile != null)
         {
@@ -109,7 +110,8 @@ public class Settings : MonoBehaviour
     {
         window.SetActive(true);
         Time.timeScale = 0;
-        camera.enabled = false;
+        if(camera != null) camera.enabled = false;
+        if(NewGameMenu.instance != null) NewGameMenu.instance.CloseWindow();
         isOpen = true;
         UpdateVisual();
     }
@@ -117,8 +119,8 @@ public class Settings : MonoBehaviour
     public void CloseWindow()
     {
         window.SetActive(false);
-        timeForward.UpdateTimeScale();
-        camera.enabled = true;
+        if(timeForward != null) timeForward.UpdateTimeScale();
+        if(camera != null) camera.enabled = true;
         isOpen = false;
     }
 
@@ -203,7 +205,7 @@ public class Settings : MonoBehaviour
 
     public void ApplyChanges()
     {
-        TownManager.instance.maxSimultaneousWanderers = wanderCountGraphics[graphicsIndex];
+        if(TownManager.instance != null) TownManager.instance.maxSimultaneousWanderers = wanderCountGraphics[graphicsIndex];
         ApplyGraphicsTier(graphics);
     }
 
@@ -245,5 +247,18 @@ public class Settings : MonoBehaviour
                 if (chromaticAberration != null) chromaticAberration.active = true;
                 break;
         }
+    }
+
+    public void MainMenu()
+    {
+        StartCoroutine(GoToMainMenu());
+    }
+
+    IEnumerator GoToMainMenu()
+    {
+        BlackScreenTransition.instance.TransitionOut();
+        DataPersistenceManager.instance.SaveGame();
+        yield return new WaitForSecondsRealtime(BlackScreenTransition.instance.outDuration);
+        SceneManager.LoadScene("MainMenu");
     }
 }

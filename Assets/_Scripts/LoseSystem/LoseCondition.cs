@@ -197,6 +197,12 @@ public class LoseCondition : MonoBehaviour
         randomVillager.Death(false);
     }
 
+    public void MainMenu()
+    {
+        VillagerSavingSystem.instance.hasLost = true;
+        Settings.instance.MainMenu();
+    } 
+
     IEnumerator LossPopulation()
     {
         while(true)

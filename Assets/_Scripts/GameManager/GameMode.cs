@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 public enum Mode 
@@ -15,6 +16,13 @@ public class GameMode : MonoBehaviour
     public Difficulty difficulty;
 
     public DifficultyScale currentDifficulty;
+
+    [Header("Endless Modifiers")]
+    public float o_VirusPower; //o_ => Override
+    public float o_ShopMultiplier;
+    public float o_PenaltyMultiplier;
+    public int o_StartingCash;
+    public float o_ScaleRate;
 
     void Awake()
     {
@@ -59,10 +67,16 @@ public class GameMode : MonoBehaviour
             {
                 if(DifficultyScaling.instance.difficultyScales[i].difficulty == Difficulty.Normal)
                 {
-                    currentDifficulty = DifficultyScaling.instance.difficultyScales[i];
+                    currentDifficulty = DifficultyScaling.instance.difficultyScales[i].Clone();
                     break;
                 }
             }
+
+            currentDifficulty.startingCash = o_StartingCash;
+            currentDifficulty.shopDiscount = 1f - o_ShopMultiplier;
+            currentDifficulty.penaltyDiscount = 1f - o_PenaltyMultiplier;
+            currentDifficulty.virusPower = o_VirusPower;
+            DifficultyScaling.instance.dailyMultiplyer = o_ScaleRate;
             return;
         }
 

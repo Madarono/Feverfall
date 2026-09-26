@@ -27,7 +27,7 @@ public class Gate : MonoBehaviour
         underPos = new Vector2Int((int)transform.position.x, (int)transform.position.y - 1);
         RoadSystem.instance.PutRoad(underPos, false);
     }
-    public void SpawnNewVillager()
+    public void SpawnNewVillager(bool sound = true)
     {
         Vector3 goPos = new Vector3(underPos.x, underPos.y, 0);
 
@@ -40,13 +40,13 @@ public class Gate : MonoBehaviour
         }
 
         newVillagerSpawned = go;
-        AudioManager.instance.Play(AudioManager.instance.villagerCome);
+        if(sound) AudioManager.instance.Play(AudioManager.instance.villagerCome);
         PopupText.instance.Popup("A traveller came to your village.");
     }
 
-    public GameObject SpawnNewVillagerInfo()
+    public GameObject SpawnNewVillagerInfo(bool sound = true)
     {
-        SpawnNewVillager();
+        SpawnNewVillager(sound);
 
         return newVillagerSpawned;
     }

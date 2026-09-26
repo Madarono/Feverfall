@@ -90,7 +90,19 @@ public class GameData
     public Mode mode;
     public Difficulty difficulty;
 
+    public Mode mainMenuMode;
+    public Difficulty mainMenuDifficulty;
+    public bool canChooseEndless;
+
     public bool hasWon;
+    public bool hasLost;
+    public bool fromEnvelope;
+
+    public float o_VirusPower;
+    public float o_ShopMultiplier;
+    public float o_PenaltyMultiplier;
+    public int o_StartingCash;
+    public float o_ScaleRate;
 
     public GameData()
     {
@@ -103,6 +115,15 @@ public class GameData
         fpsIndex = 1;
         mode = Mode.Normal;
         difficulty = Difficulty.Normal;
+        mainMenuMode = Mode.Normal;
+        mainMenuDifficulty = Difficulty.Normal;
+        canChooseEndless = false;
+
+        o_VirusPower = 1f;
+        o_ShopMultiplier = 1f;
+        o_PenaltyMultiplier = 1f;
+        o_StartingCash = 100;
+        o_ScaleRate = 0.01f;
 
         ResetToNewGame();
     }
@@ -183,6 +204,8 @@ public class GameData
         doneTutorials.Clear();
 
         newGame = true;
-        hasWon = true;
+        hasWon = false;
+        hasLost = false;
+        fromEnvelope = false;
     }
 }

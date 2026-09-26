@@ -57,7 +57,7 @@ public class PopupText : MonoBehaviour
 
     public void Popup(string input, bool sound = true, bool tutorial = false)
     {
-        if(TutorialSystem.instance.isActive && !tutorial) return;
+        if(TutorialSystem.instance != null && TutorialSystem.instance.isActive && !tutorial) return;
 
         if (currentPopup != null)
         {

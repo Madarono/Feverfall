@@ -1,19 +1,22 @@
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
-    public static AudioManager instance {get; private set;}
-    public float master;
-    public float music;
+    public static AudioManager instance { get; private set; }
+
+    [Header("Volume Controls")]
+    [Range(0f, 1f)] public float master = 1f;
+    [Range(0f, 1f)] public float music = 1f;
     public AudioSource source;
 
     [Header("Play GameObject")]
     public GameObject playPrefab;
     public AudioSource musicSource;
 
-    [Header("Vilagers")]
+    [Header("Villagers")]
     public AudioClip villagerAssign;
     public AudioClip villagerRevoke;
     public AudioClip villagerCome;
@@ -51,6 +54,7 @@ public class AudioManager : MonoBehaviour
     [Header("Misc.")]
     public AudioClip envellope;
     public AudioClip loseSong;
+    public AudioClip hoverButton;
 
     [Header("Camera")]
     public AudioClip zoomIn;
@@ -58,30 +62,88 @@ public class AudioManager : MonoBehaviour
 
     void Awake()
     {
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
-    public void Play(AudioClip clip, float amplification = 1f, bool music = false)
+    private void OnEnable()
     {
-        if((music && Settings.instance.muteMusic) || (!music && Settings.instance.muteSfx)) return;
-
-        float volume = music ? this.music : master;
-        volume *= amplification;
-        source.PlayOneShot(clip, volume);
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    public GameObject PlayGameObject(AudioClip clip, float amplification = 1f, bool music = false)
+    private void OnDisable()
     {
-        if((music && Settings.instance.muteMusic) || (!music && Settings.instance.muteSfx)) return null;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
 
-        float volume = music ? this.music : master;
-        volume *= amplification;
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        FindAndAssignMusicSource();
+        UpdateVolume();
+    }
+
+    void Start()
+    {
+        FindAndAssignMusicSource();
+    }
+
+    public void FindAndAssignMusicSource()
+    {
+        GameObject musicObj = GameObject.Find("MusicTrack");
+        if (musicObj != null)
+        {
+            if (musicObj.TryGetComponent(out AudioSource audioSrc))
+            {
+                musicSource = audioSrc;
+            }
+        }
+        else
+        {
+            AudioSource[] sources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+            foreach (AudioSource src in sources)
+            {
+                if (src != source)
+                {
+                    musicSource = src;
+                    break;
+                }
+            }
+        }
+    }
+
+    public void Play(AudioClip clip, float amplification = 1f, bool isMusic = false)
+    {
+        if((isMusic && Settings.instance.muteMusic) || (!isMusic && Settings.instance.muteSfx)) return;
+
+        float baseVolume = isMusic ? music : master;
+        float finalVolume = Mathf.Clamp01(baseVolume * amplification);
+
+        if (source != null)
+        {
+            source.PlayOneShot(clip, finalVolume);
+        }
+    }
+
+    public GameObject PlayGameObject(AudioClip clip, float amplification = 1f, bool isMusic = false)
+    {
+        if((isMusic && Settings.instance.muteMusic) || (!isMusic && Settings.instance.muteSfx)) return null;
+
+        float baseVolume = isMusic ? music : master;
+        float finalVolume = Mathf.Clamp01(baseVolume * amplification);
+
+        if (playPrefab == null) return null;
 
         GameObject go = Instantiate(playPrefab, Vector3.zero, Quaternion.identity);
-        if(go.TryGetComponent(out AudioItem goScript))
+        if (go.TryGetComponent(out AudioItem goScript))
         {
             goScript.clip = clip;
-            goScript.volume = volume;
+            goScript.volume = finalVolume;
             goScript.Play();
         }
 
@@ -90,16 +152,34 @@ public class AudioManager : MonoBehaviour
 
     public void UpdateMusic(AudioClip clip, bool loop)
     {
-        musicSource.clip = clip;
-        musicSource.loop = loop;
-        musicSource.Play();
+        if (musicSource == null)
+        {
+            FindAndAssignMusicSource();
+        }
+
+        if (musicSource != null)
+        {
+            musicSource.clip = clip;
+            musicSource.loop = loop;
+            musicSource.Play();
+        }
     }
     
     public void UpdateVolume()
     {
-        master = Settings.instance.sfxValue;
-        music = Settings.instance.musicValue;
-        musicSource.volume = Settings.instance.musicValue;
-        if(Settings.instance.muteMusic) musicSource.volume = 0;
+        if (Settings.instance == null) return;
+
+        master = Mathf.Clamp01(Settings.instance.sfxValue);
+        music = Mathf.Clamp01(Settings.instance.musicValue);
+
+        if (musicSource == null)
+        {
+            FindAndAssignMusicSource();
+        }
+
+        if (musicSource != null)
+        {
+            musicSource.volume = Settings.instance.muteMusic ? 0f : music;
+        }
     }
 }

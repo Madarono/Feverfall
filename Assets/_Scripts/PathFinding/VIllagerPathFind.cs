@@ -5,9 +5,8 @@ using UnityEngine;
 public class VillagerPathFind : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
-    private VillagerAI villager;
-    
-    private GridManager gridManager;
+    public VillagerAI villager;
+
     private List<Vector2Int> currentPath = new List<Vector2Int>();
     public bool isMoving = false;
 
@@ -17,9 +16,7 @@ public class VillagerPathFind : MonoBehaviour
 
     void Start()
     {
-        villager = GetComponent<VillagerAI>();
         moveSpeed = villager.villagerSpeed * villager.villagerHealth.functionSpeed;
-        gridManager = GridManager.instance;
 
         currentGridPosition = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
         
@@ -28,7 +25,19 @@ public class VillagerPathFind : MonoBehaviour
 
     public void OrderMoveTo(Vector2Int targetCoordinates)
     {
-        gridManager.RequestPath(currentGridPosition, targetCoordinates, OnPathCalculated);
+        if(GridManager.instance.walkableGrid.Length <= 0) 
+        {
+            Debug.Log("No roads yet");
+            return;
+        }
+
+        if (GridManager.instance == null || !GridManager.instance.isReady)
+        {
+            villager.FailedPathfinding();
+            return;
+        }
+
+        GridManager.instance.RequestPath(currentGridPosition, targetCoordinates, OnPathCalculated);
     }
 
     private void OnPathCalculated(List<Vector2Int> newPath)

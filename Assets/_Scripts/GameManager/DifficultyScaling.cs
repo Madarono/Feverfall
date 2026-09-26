@@ -34,6 +34,11 @@ public class DifficultyScale
 
     [Header("Penalty Discount")]
     [Range(-1f,1f)] public float penaltyDiscount = 0f;
+
+    public DifficultyScale Clone()
+    {
+        return (DifficultyScale)this.MemberwiseClone();
+    }
 }
 
 public class DifficultyScaling : MonoBehaviour

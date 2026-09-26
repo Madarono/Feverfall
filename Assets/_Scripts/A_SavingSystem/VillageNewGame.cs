@@ -61,12 +61,12 @@ public class VillageNewGame : MonoBehaviour
 
         foreach(var roadPlacement in roadPlacement)
         {
-            road.PutRoad(roadPlacement);
+            road.PutRoad(roadPlacement, false);
         }
         
         foreach(var villagerPos in villagerPlacement)
         {
-            GameObject newVillager = gate.SpawnNewVillagerInfo();
+            GameObject newVillager = gate.SpawnNewVillagerInfo(false);
             Vector3 newVillagerPos = new Vector3(villagerPos.x, villagerPos.y, 0);
             newVillager.transform.position = newVillagerPos;
         }

@@ -24,6 +24,9 @@ public class CameraPinch : MonoBehaviour
     [Tooltip("Prevents the player from spam-triggering resolution swaps.")]
     public float zoomCooldown = 0.4f; 
 
+    [Header("Main Menu")]
+    public bool mainMenu;
+
     [Header("UI Buffer Transition Mask")]
     [SerializeField] private CanvasGroup uiMask;
 
@@ -53,14 +56,14 @@ public class CameraPinch : MonoBehaviour
 
     void Update()
     {
-        if(LoseCondition.instance.lost || ActiveWindow.instance.isActive) return;
+        if(!mainMenu && (LoseCondition.instance.lost || ActiveWindow.instance.isActive)) return;
         
-        if ((Time.timeScale == 0 && TimeForward.instance.choosing != 0) || RoadSystem.instance.isMultiBrush) 
+        if (!mainMenu && ((Time.timeScale == 0 && TimeForward.instance.choosing != 0) || RoadSystem.instance.isMultiBrush)) 
         {
             return;
         }
 
-        if (Input.touchCount == 2)
+        if (Input.touchCount == 2 && !mainMenu)
         {
             isPanning = false;
 
@@ -99,7 +102,7 @@ public class CameraPinch : MonoBehaviour
 
             if (touch.phase == TouchPhase.Began)
             {
-                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(touch.fingerId) && !ViewMode.instance.viewMode)
+                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(touch.fingerId) && (mainMenu || (!ViewMode.instance.viewMode && !mainMenu)))
                 {
                     isPanning = false;
                 }
@@ -128,7 +131,7 @@ public class CameraPinch : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0))
             {
-                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(-1) && !ViewMode.instance.viewMode)
+                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(-1) && (mainMenu || (!ViewMode.instance.viewMode && !mainMenu)))
                 {
                     isPanning = false;
                 }
@@ -158,7 +161,7 @@ public class CameraPinch : MonoBehaviour
 
     public void SetSnapZoom(bool isZoomedIn)
     {
-        if (pixelCam == null) return;
+        if (pixelCam == null || mainMenu) return;
 
         if (Time.unscaledTime < nextZoomAllowedTime) return;
 

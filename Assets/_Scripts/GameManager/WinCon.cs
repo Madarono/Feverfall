@@ -72,6 +72,7 @@ public class WinCon : MonoBehaviour
 
     public void MainMenu()
     {
-        //Make some black transition to MainMenu
+        VillagerSavingSystem.instance.fromEnvelope = true;
+        Settings.instance.MainMenu();
     }
 }

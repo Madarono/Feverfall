@@ -5,6 +5,7 @@ using UnityEngine;
 public class GridManager : MonoBehaviour
 {
     public static GridManager instance { get; private set; }
+    public bool isReady { get; private set; } = false;
 
     public Gate gate;
     public HashSet<VillageBuildable> buildings = new HashSet<VillageBuildable>();
@@ -40,7 +41,12 @@ public class GridManager : MonoBehaviour
         InitializeGrid();
     }
 
-    void Start()
+    // void Start()
+    // {
+    //     StartManager();
+    // }
+
+    public void StartManager()
     {
         foreach(var building in buildings)
         {
@@ -55,6 +61,8 @@ public class GridManager : MonoBehaviour
         gate.gridTaken.PutUnwalkable();
 
         pathfinder = new CustomPathfinding(width, height, walkableGrid);
+
+        isReady = true; 
     }
 
     private void InitializeGrid()
@@ -97,7 +105,7 @@ public class GridManager : MonoBehaviour
     {
         requestQueue.Enqueue(new PathRequest(startCoordinates, targetCoordinates, callback));
         
-        if (!isProcessingPath)
+        if (isReady && !isProcessingPath)
         {
             StartCoroutine(ProcessNextPath());
         }
