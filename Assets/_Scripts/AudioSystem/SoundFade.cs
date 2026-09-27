@@ -35,7 +35,7 @@ public class SoundFade : MonoBehaviour
 
     IEnumerator Fade(bool fadeIn)
     {
-        float startVolume = AudioManager.instance.music;
+        float startVolume = Settings.instance.muteMusic ? 0f : AudioManager.instance.music;
 
         while (musicTrack.volume > 0 && !fadeIn)
         {
